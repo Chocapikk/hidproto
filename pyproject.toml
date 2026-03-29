@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hidproto"
-version = "0.1.0"
+version = "0.1.1"
 description = "Declarative HID protocol framework for Linux"
 authors = ["Chocapikk <balgogan@protonmail.com>"]
 readme = "README.md"
