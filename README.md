@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/hidproto)](https://pypi.org/project/hidproto/)
 [![Python](https://img.shields.io/pypi/pyversions/hidproto)](https://pypi.org/project/hidproto/)
 [![License](https://img.shields.io/github/license/Chocapikk/hidproto)](LICENSE.md)
-[![Tests](https://img.shields.io/github/actions/workflow/status/Chocapikk/hidproto/publish.yml?label=tests)](https://github.com/Chocapikk/hidproto/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Chocapikk/hidproto/tests.yml?label=tests)](https://github.com/Chocapikk/hidproto/actions)
 
 Declarative HID protocol framework for Linux. Define device protocols as pure data, the framework handles transport, discovery, effects, caching, and state tracking.
 
