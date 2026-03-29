@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
-
-from typing import Any
+from typing import Any, Callable
 
 from .checksum import xor_checksum
 from .command import CommandSpec, command

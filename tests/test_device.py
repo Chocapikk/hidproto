@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from hidproto import HIDDevice, command, effect
-from hidproto.effect import apply_effect
 
 from .test_command import FakeProto, FakeTransport
 

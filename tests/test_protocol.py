@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from hidproto import HIDProtocol, command
 from hidproto.checksum import sum_checksum, xor_checksum
 
 from .test_command import FakeProto, FakeTransport, _proto
