@@ -1,4 +1,4 @@
-"""hidproto - Declarative HID protocol framework for Linux."""
+"""hidproto - A Python DSL for HID device protocols on Linux."""
 
 from .checksum import sum_checksum, xor_checksum
 from .command import CommandSpec, command

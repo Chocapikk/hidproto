@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/github/license/Chocapikk/hidproto)](LICENSE.md)
 [![Tests](https://img.shields.io/github/actions/workflow/status/Chocapikk/hidproto/tests.yml?label=tests)](https://github.com/Chocapikk/hidproto/actions)
 
-Declarative HID protocol framework for Linux. Define device protocols as pure data, the framework handles transport, discovery, effects, caching, and state tracking.
+A Python DSL for HID device protocols on Linux. Define commands and effects as pure data, the runtime handles transport, discovery, checksums, and state tracking.
 
 ## Why
 
