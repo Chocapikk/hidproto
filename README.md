@@ -5,25 +5,64 @@
 [![License](https://img.shields.io/github/license/Chocapikk/hidproto)](LICENSE.md)
 [![Tests](https://img.shields.io/github/actions/workflow/status/Chocapikk/hidproto/tests.yml?label=tests)](https://github.com/Chocapikk/hidproto/actions)
 
-A Python DSL for HID device protocols on Linux. Define commands and effects as pure data, the runtime handles transport, discovery, checksums, and state tracking.
+A Python DSL for HID device protocols. Define commands and effects as pure data, the runtime handles transport, discovery, checksums, and state tracking. Works on Linux, Windows, and macOS.
 
 ## Why
 
-Every HID device project (OpenRGB, keyRGB, rivalcfg, openrazer) rewrites the same boilerplate: open hidraw, build reports, send ioctl, manage state. hidproto lets you define a protocol in ~50 lines of pure data and get a working device driver.
+Every HID device project (OpenRGB, keyRGB, rivalcfg, openrazer) rewrites the same boilerplate: open device, build reports, send ioctl, manage state. hidproto lets you define a protocol in ~50 lines of pure data and get a working device driver.
+
+Existing Python RGB libraries (PyRGBDev, pychroma, python-rgbkeyboards) all depend on vendor SDKs and only work on Windows. hidproto talks HID directly, no vendor SDK needed.
 
 ## Install
 
 ```bash
-pip install hidproto
+pip install hidproto            # Linux (hidraw, zero deps)
+pip install hidproto[hidapi]    # Windows / macOS (cross-platform)
 ```
 
-Or from source:
+## Platform support
 
-```bash
-git clone https://github.com/Chocapikk/hidproto
-cd hidproto
-pip install -e .
-```
+| Platform | Transport | Dependencies |
+|----------|-----------|-------------|
+| Linux | hidraw (native ioctl) | None |
+| Windows | hidapi | `pip install hidapi` |
+| macOS | hidapi | `pip install hidapi` |
+
+On Linux, hidraw is used by default for zero-dependency operation. On other platforms, the hidapi backend is auto-selected. You can also force hidapi on Linux with `pip install hidproto[hidapi]`.
+
+## Supported devices
+
+25 protocols across 19 vendors, all auto-discovered:
+
+| Vendor | Device | Effects |
+|--------|--------|---------|
+| Alienware | AW510K | 7 (static, breathing, spectrum, wave, rainbow, scanner, off) |
+| ASUS | TUF/ROG keyboards | 9 (static, breathing, wave, ripple, reactive, starry, rain, direct, off) |
+| Cherry | MX Board | 8 (wave, spectrum, breathing, static, radar, fire, stars, rain) |
+| CoolerMaster | MasterKeys Pro | 9 (direct, static, breathing, cycle, wave, ripple, snake, reactive, stars) |
+| Corsair | K70/K95 | 7 (color shift, color pulse, rainbow wave, color wave, rain, spiral, visor) |
+| Das | Q5 | XOR checksum protocol |
+| Ducky | One 2 RGB | Multi-packet direct mode |
+| Fnatic | Streak | 6 (pulse, wave, reactive, ripple, rain, fade) |
+| HyperX | Alloy Elite | 8 (wave variants, static, breathing) with 6 directions |
+| ITE | 8291 rev3 | 9 (breathing, wave, random, rainbow, ripple, marquee, raindrop, aurora, fireworks) |
+| ITE | 8297 | Uniform color |
+| ITE | 8910 | 11 (full per-key + animations with 8 wave / 4 snake directions) |
+| Keychron | K3 V2 | 7 (static, breathing, spectrum, sparkle, rain, random, off) |
+| Logitech | G815 (HID++) | 6 (off, static, spectrum, wave, breathing, ripple) |
+| Mountain | Everest | 6 (static, breathing, wave, reactive, tornado, off) |
+| MSI | Vigor GK30 | 7 (off, static, breathing, rainbow, meteor, ripple, dimming) |
+| NZXT | Lift mouse | Direct LED control |
+| Obinslab | Anne Pro 2 | Static mode |
+| QMK | OpenRGB firmware | 8 (direct, solid, breathing, rainbow, swirl, snake, knight, splash) |
+| Razer | BlackWidow | 5 (static, wave, breathing, spectrum, off) with XOR checksum |
+| Redragon | M711 mouse | 5 (wave, breathing, static, rainbow, flashing) |
+| Roccat | Vulcan | 3 (direct, static, wave) with 16-bit checksum |
+| Sony | DualShock 4 | Lightbar RGB control |
+| SteelSeries | Apex Pro | Direct mode + profiles |
+| Wooting | 60HE | Magic byte protocol |
+
+Adding a new device is one Python file in `protocols/<vendor>/`. The registry auto-discovers it.
 
 ## Quick start
 
@@ -60,25 +99,7 @@ with Keyboard() as kb:
     kb.effect("wave", direction="right", color=(255, 0, 0))
 ```
 
-That's it. No boilerplate, no subclassing, no transport code.
-
-## Features
-
-**Protocol definition** - `command()` descriptor auto-generates report builders from opcode + arg count. No methods to write.
-
-**Effect dispatch** - `effect()` declaratively maps names to animation modes, color slots, directional slots. One `kb.effect("wave", direction="right")` call handles everything.
-
-**Device discovery** - auto-finds devices via `/sys/class/hidraw` by VID/PID.
-
-**Transport** - hidraw ioctl for feature reports, `os.write` for output reports, `select` for reads with timeout.
-
-**State caching** - `send_if_changed()` skips redundant HID sends. `invalidate()` forces resync (suspend/resume).
-
-**Checksums** - `xor_checksum()`, `sum_checksum()`, and `_with_checksum()` for protocols that need them (Razer, Corsair).
-
-**Sequence numbers** - `_next_seq()` for transactional protocols (Logitech, Corsair).
-
-**CLI** - `hidproto` command with auto-generated subcommands per protocol. Each effect gets its own `--help` with only the relevant options.
+No boilerplate, no subclassing, no transport code.
 
 ## CLI
 
@@ -89,31 +110,44 @@ hidproto ite8910 wave -d right -b 8 -s 5            # wave rainbow, right, brigh
 hidproto ite8910 wave -d left -c ff0000             # wave red, left
 hidproto ite8910 breathing -c 00ff00 -b 8           # breathing green
 hidproto ite8910 scan -c ff0000 --color2 0000ff     # scan red + blue
-hidproto ite8910 snake -d down_right -c 0000ff      # snake blue, diagonal
 hidproto ite8910 off                                # turn off
-hidproto ite8910 brightness 8                       # set brightness only
-hidproto ite8910 speed 5                            # set speed only
 ```
 
-Options are generated from the protocol definition. `wave --help` shows `--direction` with valid choices, `scan --help` shows `--color` and `--color2`, `spectrum_cycle --help` shows only brightness/speed.
+All options are auto-generated from the protocol definition. Each device gets its own subcommands with `--help`.
+
+## Features
+
+- **DSL** - `command()` and `effect()` descriptors generate everything from pure data
+- **Multi-step effects** - `step()` chains multiple commands for complex protocols (Corsair, Cherry)
+- **Auto-discovery** - protocols registered via entry points or filesystem scan
+- **Cross-platform** - hidraw on Linux, hidapi on Windows/macOS
+- **Checksums** - XOR (Razer, Das), SUM (Cherry), custom via `_with_checksum()`
+- **State caching** - skip redundant sends, invalidate on resume
+- **CLI** - Click-based with per-device subcommands
 
 ## Architecture
 
 ```
 hidproto/
-  cli.py         Click CLI with auto-generated subcommands
-  command.py     CommandSpec + @command descriptor
-  effect.py      EffectSpec + declarative effect dispatch
-  protocol.py    HIDProtocol base class (report building, transport)
-  device.py      HIDDevice wrapper (effects, caching, brightness/speed)
-  transport.py   HidrawTransport (ioctl, read, write)
-  discovery.py   sysfs device discovery
-  checksum.py    xor/sum checksum helpers
+  cli.py              Click CLI with auto-generated subcommands
+  command.py           CommandSpec + @command descriptor
+  effect.py            EffectSpec + step() for multi-step effects
+  protocol.py          HIDProtocol base (report building, transport)
+  device.py            HIDDevice wrapper (effects, caching, brightness/speed)
+  transport.py         HidrawTransport (Linux native)
+  transport_hidapi.py  HidapiTransport (cross-platform)
+  discovery.py         sysfs device discovery
+  registry.py          Auto-discovery + entry point plugin system
+  checksum.py          xor/sum checksum helpers
+
+protocols/
+  alienware/    asus/       cherry/     coolermaster/
+  corsair/      das/        ducky/      fnatic/
+  hyperx/       ite/        keychron/   logitech/
+  mountain/     msi/        nzxt/       obinslab/
+  qmk/          razer/      redragon/   roccat/
+  sony/         steelseries/ wooting/
 ```
-
-## Examples
-
-See `protocols/ite8910.py` for a complete ITE 8910 keyboard RGB implementation: 9 commands, 11 effects, 8 wave directions, 4 snake diagonals, per-key color. All in ~70 lines of data.
 
 ## License
 
