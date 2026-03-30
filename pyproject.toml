@@ -30,6 +30,10 @@ hidproto = "hidproto.cli:main"
 [tool.poetry.dependencies]
 python = "^3.10"
 click = "^8.0"
+hidapi = {version = "^0.14", optional = true}
+
+[tool.poetry.extras]
+hidapi = ["hidapi"]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9"

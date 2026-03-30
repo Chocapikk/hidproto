@@ -9,6 +9,11 @@ from .protocol import HIDProtocol
 from .registry import discover, get, names, register
 from .transport import HidrawTransport
 
+try:
+    from .transport_hidapi import HidapiTransport
+except ImportError:
+    HidapiTransport = None  # type: ignore[assignment, misc]
+
 __all__ = [
     "CommandSpec",
     "DeviceInfo",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import Any, Callable
 
 from .checksum import xor_checksum
@@ -63,18 +64,30 @@ class HIDProtocol(metaclass=_ProtocolMeta):
     color_custom: int = 0x00
     _commands: dict[str, CommandSpec]
 
-    def __init__(self, transport: HidrawTransport | None = None) -> None:
+    def __init__(self, transport: object | None = None) -> None:
         self._transport = transport or self._auto_transport()
         self._seq = 0
 
     @classmethod
     def _auto_transport(cls) -> HidrawTransport:
-        info = find_device(cls.vendor_id, cls.product_id)
-        if info is None:
-            raise FileNotFoundError(
-                f"No device found for {cls.vendor_id:04x}:{cls.product_id:04x}"
-            )
-        return HidrawTransport(info.devnode)
+        """Auto-select transport: hidraw on Linux, hidapi elsewhere."""
+        if sys.platform == "linux":
+            info = find_device(cls.vendor_id, cls.product_id)
+            if info is not None:
+                return HidrawTransport(info.devnode)
+
+        # Fallback to hidapi (cross-platform)
+        try:
+            from .transport_hidapi import HidapiTransport
+
+            return HidapiTransport(cls.vendor_id, cls.product_id)
+        except ImportError:
+            pass
+
+        raise FileNotFoundError(
+            f"No device found for {cls.vendor_id:04x}:{cls.product_id:04x}. "
+            f"On non-Linux platforms, install hidapi: pip install hidapi"
+        )
 
     # --- Report building ---
 
