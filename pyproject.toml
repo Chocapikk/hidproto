@@ -20,11 +20,15 @@ classifiers = [
     "Topic :: System :: Hardware :: Hardware Drivers",
 ]
 
+[tool.poetry.scripts]
+hidproto = "hidproto.cli:main"
+
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/Chocapikk/hidproto/issues"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+click = "^8.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9"
