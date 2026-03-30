@@ -5,6 +5,7 @@ from .command import CommandSpec, command
 from .device import HIDDevice
 from .discovery import DeviceInfo, find_device, list_devices
 from .effect import EffectSpec, Step, apply_effect, effect, step
+from .layout import Key
 from .protocol import HIDProtocol
 from .registry import discover, get, names, register
 from .transport import HidrawTransport
@@ -22,6 +23,7 @@ __all__ = [
     "HIDDevice",
     "HIDProtocol",
     "HidrawTransport",
+    "Key",
     "apply_effect",
     "command",
     "effect",

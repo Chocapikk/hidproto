@@ -6,7 +6,7 @@ from PySide6.QtCore import QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
-from .layouts import Key
+from hidproto.layout import Key
 
 
 class KeyboardWidget(QWidget):

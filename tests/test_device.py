@@ -21,11 +21,11 @@ class EffectProto(FakeProto):
     slot_cmd = command(0x15, args=4)
 
     effects = dict(
-        off       = effect("off",       animation=0x0C, needs_clear=True),
-        simple    = effect("simple",    animation=0x02),
-        colored   = effect("colored",   color_cmd="color_cmd", color_slots=1),
-        slotted   = effect("slotted",   animation=0x04, slot_cmd="slot_cmd", color_slots=2),
-        directed  = effect("directed",  animation=0x04, slot_cmd="slot_cmd", directions=("up", "down")),
+        off=effect("off", animation=0x0C, needs_clear=True),
+        simple=effect("simple", animation=0x02),
+        colored=effect("colored", color_cmd="color_cmd", color_slots=1),
+        slotted=effect("slotted", animation=0x04, slot_cmd="slot_cmd", color_slots=2),
+        directed=effect("directed", animation=0x04, slot_cmd="slot_cmd", directions=("up", "down")),
     )
 
 
@@ -125,7 +125,7 @@ def test_for_protocol() -> None:
 
 def test_batch() -> None:
     dev, transport = _device()
-    reports = [b"\xAA\x01\x00\x00\x00\x00", b"\xAA\x01\x01\x00\x00\x00"]
+    reports = [b"\xaa\x01\x00\x00\x00\x00", b"\xaa\x01\x01\x00\x00\x00"]
     dev.batch(reports)
     assert len(transport.sent) == 2
 

@@ -27,9 +27,7 @@ class DeviceInfo:
     name: str = ""
 
     def __str__(self) -> str:
-        return (
-            f"{self.devnode} [{self.vendor_id:04x}:{self.product_id:04x}] {self.name}"
-        )
+        return f"{self.devnode} [{self.vendor_id:04x}:{self.product_id:04x}] {self.name}"
 
 
 def _parse_uevent(uevent_path: Path) -> dict[str, str]:

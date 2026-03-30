@@ -24,7 +24,6 @@ from hidproto.discovery import list_devices
 from hidproto.registry import discover
 
 from .keyboard_widget import KeyboardWidget
-from .layouts import LAYOUTS
 
 
 class MainWindow(QMainWindow):
@@ -45,8 +44,7 @@ class MainWindow(QMainWindow):
 
         # Keyboard widget (replaced on connect with device-specific layout)
         self._root = root
-        self._kb_widget = KeyboardWidget(LAYOUTS["full"])
-        self._kb_widget.key_clicked.connect(self._on_key_clicked)
+        self._kb_widget = KeyboardWidget([])
         root.insertWidget(0, self._kb_widget)
 
         # Controls row 1
@@ -136,11 +134,10 @@ class MainWindow(QMainWindow):
                         self._device_label.setStyleSheet("color: #2a6; font-size: 11px;")
                         self.statusBar().showMessage(f"Connected: {name}")
 
-                        # Swap keyboard layout
-                        kb_size = getattr(proto_cls, "keyboard_size", "full")
-                        layout = LAYOUTS.get(kb_size, LAYOUTS["full"])
+                        # Swap keyboard layout from protocol
+                        proto_keys = getattr(proto_cls, "keys", ())
                         old = self._kb_widget
-                        self._kb_widget = KeyboardWidget(layout)
+                        self._kb_widget = KeyboardWidget(list(proto_keys))
                         self._kb_widget.key_clicked.connect(self._on_key_clicked)
                         self._root.replaceWidget(old, self._kb_widget)
                         old.deleteLater()

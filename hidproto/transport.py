@@ -24,12 +24,7 @@ _IOC_DIRSHIFT = _IOC_SIZESHIFT + _IOC_SIZEBITS
 
 
 def _ioc(direction: int, type_: int, nr: int, size: int) -> int:
-    return (
-        (direction << _IOC_DIRSHIFT)
-        | (type_ << _IOC_TYPESHIFT)
-        | (nr << _IOC_NRSHIFT)
-        | (size << _IOC_SIZESHIFT)
-    )
+    return (direction << _IOC_DIRSHIFT) | (type_ << _IOC_TYPESHIFT) | (nr << _IOC_NRSHIFT) | (size << _IOC_SIZESHIFT)
 
 
 def _hidiocsfeature(length: int) -> int:
