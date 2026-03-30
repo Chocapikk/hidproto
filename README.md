@@ -22,11 +22,11 @@ pip install hidproto[hidapi]    # Windows / macOS (cross-platform)
 
 ## Platform support
 
-| Platform | Transport | Dependencies |
-|----------|-----------|-------------|
-| Linux | hidraw (native ioctl) | None |
-| Windows | hidapi | `pip install hidapi` |
-| macOS | hidapi | `pip install hidapi` |
+| Platform | Transport             | Dependencies         |
+| -------- | --------------------- | -------------------- |
+| Linux    | hidraw (native ioctl) | None                 |
+| Windows  | hidapi                | `pip install hidapi` |
+| macOS    | hidapi                | `pip install hidapi` |
 
 On Linux, hidraw is used by default for zero-dependency operation. On other platforms, the hidapi backend is auto-selected. You can also force hidapi on Linux with `pip install hidproto[hidapi]`.
 
@@ -34,33 +34,33 @@ On Linux, hidraw is used by default for zero-dependency operation. On other plat
 
 25 protocols across 19 vendors, all auto-discovered:
 
-| Vendor | Device | Effects |
-|--------|--------|---------|
-| Alienware | AW510K | 7 (static, breathing, spectrum, wave, rainbow, scanner, off) |
-| ASUS | TUF/ROG keyboards | 9 (static, breathing, wave, ripple, reactive, starry, rain, direct, off) |
-| Cherry | MX Board | 8 (wave, spectrum, breathing, static, radar, fire, stars, rain) |
-| CoolerMaster | MasterKeys Pro | 9 (direct, static, breathing, cycle, wave, ripple, snake, reactive, stars) |
-| Corsair | K70/K95 | 7 (color shift, color pulse, rainbow wave, color wave, rain, spiral, visor) |
-| Das | Q5 | XOR checksum protocol |
-| Ducky | One 2 RGB | Multi-packet direct mode |
-| Fnatic | Streak | 6 (pulse, wave, reactive, ripple, rain, fade) |
-| HyperX | Alloy Elite | 8 (wave variants, static, breathing) with 6 directions |
-| ITE | 8291 rev3 | 9 (breathing, wave, random, rainbow, ripple, marquee, raindrop, aurora, fireworks) |
-| ITE | 8297 | Uniform color |
-| ITE | 8910 | 11 (full per-key + animations with 8 wave / 4 snake directions) |
-| Keychron | K3 V2 | 7 (static, breathing, spectrum, sparkle, rain, random, off) |
-| Logitech | G815 (HID++) | 6 (off, static, spectrum, wave, breathing, ripple) |
-| Mountain | Everest | 6 (static, breathing, wave, reactive, tornado, off) |
-| MSI | Vigor GK30 | 7 (off, static, breathing, rainbow, meteor, ripple, dimming) |
-| NZXT | Lift mouse | Direct LED control |
-| Obinslab | Anne Pro 2 | Static mode |
-| QMK | OpenRGB firmware | 8 (direct, solid, breathing, rainbow, swirl, snake, knight, splash) |
-| Razer | BlackWidow | 5 (static, wave, breathing, spectrum, off) with XOR checksum |
-| Redragon | M711 mouse | 5 (wave, breathing, static, rainbow, flashing) |
-| Roccat | Vulcan | 3 (direct, static, wave) with 16-bit checksum |
-| Sony | DualShock 4 | Lightbar RGB control |
-| SteelSeries | Apex Pro | Direct mode + profiles |
-| Wooting | 60HE | Magic byte protocol |
+| Vendor       | Device            | Effects                                                                            |
+| ------------ | ----------------- | ---------------------------------------------------------------------------------- |
+| Alienware    | AW510K            | 7 (static, breathing, spectrum, wave, rainbow, scanner, off)                       |
+| ASUS         | TUF/ROG keyboards | 9 (static, breathing, wave, ripple, reactive, starry, rain, direct, off)           |
+| Cherry       | MX Board          | 8 (wave, spectrum, breathing, static, radar, fire, stars, rain)                    |
+| CoolerMaster | MasterKeys Pro    | 9 (direct, static, breathing, cycle, wave, ripple, snake, reactive, stars)         |
+| Corsair      | K70/K95           | 7 (color shift, color pulse, rainbow wave, color wave, rain, spiral, visor)        |
+| Das          | Q5                | XOR checksum protocol                                                              |
+| Ducky        | One 2 RGB         | Multi-packet direct mode                                                           |
+| Fnatic       | Streak            | 6 (pulse, wave, reactive, ripple, rain, fade)                                      |
+| HyperX       | Alloy Elite       | 8 (wave variants, static, breathing) with 6 directions                             |
+| ITE          | 8291 rev3         | 9 (breathing, wave, random, rainbow, ripple, marquee, raindrop, aurora, fireworks) |
+| ITE          | 8297              | Uniform color                                                                      |
+| ITE          | 8910              | 11 (full per-key + animations with 8 wave / 4 snake directions)                    |
+| Keychron     | K3 V2             | 7 (static, breathing, spectrum, sparkle, rain, random, off)                        |
+| Logitech     | G815 (HID++)      | 6 (off, static, spectrum, wave, breathing, ripple)                                 |
+| Mountain     | Everest           | 6 (static, breathing, wave, reactive, tornado, off)                                |
+| MSI          | Vigor GK30        | 7 (off, static, breathing, rainbow, meteor, ripple, dimming)                       |
+| NZXT         | Lift mouse        | Direct LED control                                                                 |
+| Obinslab     | Anne Pro 2        | Static mode                                                                        |
+| QMK          | OpenRGB firmware  | 8 (direct, solid, breathing, rainbow, swirl, snake, knight, splash)                |
+| Razer        | BlackWidow        | 5 (static, wave, breathing, spectrum, off) with XOR checksum                       |
+| Redragon     | M711 mouse        | 5 (wave, breathing, static, rainbow, flashing)                                     |
+| Roccat       | Vulcan            | 3 (direct, static, wave) with 16-bit checksum                                      |
+| Sony         | DualShock 4       | Lightbar RGB control                                                               |
+| SteelSeries  | Apex Pro          | Direct mode + profiles                                                             |
+| Wooting      | 60HE              | Magic byte protocol                                                                |
 
 Adding a new device is one Python file in `protocols/<vendor>/`. The registry auto-discovers it.
 
