@@ -5,6 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
+    QCheckBox,
     QColorDialog,
     QComboBox,
     QHBoxLayout,
@@ -30,13 +31,13 @@ class EffectPanel(QWidget):
         self._dir_combo: QComboBox | None = None
         self._color_btns: list[QPushButton] = []
         self._colors: list[QColor] = []
+        self._random_check: QCheckBox | None = None
 
     def configure(self, spec: EffectSpec, proto_cls: type) -> None:
         """Rebuild controls for a new effect."""
         self._spec = spec
         self._proto_cls = proto_cls
 
-        # Clear old widgets
         while self._layout.count():
             item = self._layout.takeAt(0)
             if item.widget():
@@ -45,6 +46,7 @@ class EffectPanel(QWidget):
         self._dir_combo = None
         self._color_btns = []
         self._colors = []
+        self._random_check = None
 
         # Directions
         dirs = resolve_directions(proto_cls, spec)
@@ -57,20 +59,46 @@ class EffectPanel(QWidget):
             self._layout.addWidget(self._dir_combo)
 
         # Color slots
-        for i in range(spec.color_slots):
-            default = QColor(255, 0, 0) if i == 0 else QColor(0, 0, 255)
-            self._colors.append(default)
+        if spec.color_slots > 0:
+            # Random checkbox
+            self._random_check = QCheckBox("Random")
+            self._random_check.setStyleSheet("color: #aaa;")
+            self._random_check.setChecked(True)
+            self._random_check.toggled.connect(self._on_random_toggled)
+            self._layout.addWidget(self._random_check)
 
-            label = f"Color {i + 1}:" if spec.color_slots > 1 else "Color:"
-            self._layout.addWidget(QLabel(label, styleSheet="color: #aaa;"))
+            for i in range(spec.color_slots):
+                default = QColor(255, 0, 0) if i == 0 else QColor(0, 0, 255)
+                self._colors.append(default)
 
-            btn = QPushButton()
-            btn.setFixedSize(30, 30)
-            self._set_btn_color(btn, default)
-            idx = i
-            btn.clicked.connect(lambda checked=False, ci=idx: self._pick_color(ci))
-            self._color_btns.append(btn)
-            self._layout.addWidget(btn)
+                label = f"Color {i + 1}:" if spec.color_slots > 1 else "Color:"
+                lbl = QLabel(label, styleSheet="color: #aaa;")
+                self._layout.addWidget(lbl)
+
+                btn = QPushButton()
+                btn.setFixedSize(30, 30)
+                self._set_btn_color(btn, default)
+                idx = i
+                btn.clicked.connect(lambda checked=False, ci=idx: self._pick_color(ci))
+                self._color_btns.append(btn)
+                self._layout.addWidget(btn)
+
+            # Start with random checked = color pickers disabled
+            self._toggle_color_widgets(False)
+
+    def _toggle_color_widgets(self, enabled: bool) -> None:
+        for btn in self._color_btns:
+            btn.setEnabled(enabled)
+            btn.setStyleSheet(
+                btn.styleSheet() if enabled else "background: #333; border: 2px solid #555; border-radius: 4px;"
+            )
+
+    def _on_random_toggled(self, checked: bool) -> None:
+        self._toggle_color_widgets(not checked)
+        if not checked:
+            for i, btn in enumerate(self._color_btns):
+                self._set_btn_color(btn, self._colors[i])
+        self.apply_requested.emit()
 
     def _set_btn_color(self, btn: QPushButton, color: QColor) -> None:
         btn.setStyleSheet(
@@ -91,6 +119,8 @@ class EffectPanel(QWidget):
         return None
 
     def get_colors(self) -> list[tuple[int, int, int]]:
+        if self._random_check and self._random_check.isChecked():
+            return []
         return [(c.red(), c.green(), c.blue()) for c in self._colors]
 
     def get_effect_kwargs(self) -> dict:
