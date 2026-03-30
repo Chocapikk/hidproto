@@ -6,6 +6,7 @@ from .device import HIDDevice
 from .discovery import DeviceInfo, find_device, list_devices
 from .effect import EffectSpec, Step, apply_effect, effect, step
 from .protocol import HIDProtocol
+from .registry import discover, get, names, register
 from .transport import HidrawTransport
 
 __all__ = [
@@ -23,5 +24,9 @@ __all__ = [
     "find_device",
     "list_devices",
     "sum_checksum",
+    "discover",
+    "get",
+    "names",
+    "register",
     "xor_checksum",
 ]

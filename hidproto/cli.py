@@ -2,46 +2,15 @@
 
 from __future__ import annotations
 
-import importlib
-import sys
-from pathlib import Path
-
 import click
 
 from .device import HIDDevice
 from .discovery import list_devices
 from .effect import resolve_directions
 from .protocol import HIDProtocol
+from .registry import discover
 
-
-def _find_protocols() -> dict[str, type[HIDProtocol]]:
-    """Discover protocol classes from examples/."""
-    protocols: dict[str, type[HIDProtocol]] = {}
-    examples_dir = Path(__file__).parent.parent / "protocols"
-
-    if not examples_dir.exists():
-        return protocols
-
-    sys.path.insert(0, str(examples_dir.parent))
-
-    for f in sorted(examples_dir.glob("*.py")):
-        if f.name.startswith("_"):
-            continue
-        try:
-            mod = importlib.import_module(f"protocols.{f.stem}")
-        except Exception:
-            continue
-
-        for attr in dir(mod):
-            obj = getattr(mod, attr)
-            if isinstance(obj, type) and issubclass(obj, HIDProtocol) and obj is not HIDProtocol:
-                protocols[f.stem] = obj
-                break
-
-    return protocols
-
-
-PROTOCOLS = _find_protocols()
+PROTOCOLS = discover()
 
 
 @click.group()
