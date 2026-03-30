@@ -49,6 +49,7 @@ ignore = ["E221"]
 
 [tool.ruff.lint.per-file-ignores]
 "protocols/*" = ["E501"]
+"gui/layouts.py" = ["E702", "E741"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
