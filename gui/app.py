@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self._device: HIDDevice | None = None
         self._current_color = QColor(255, 0, 0)
         self._proto_cls: type | None = None
+        self._in_direct_mode = False
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -169,14 +170,29 @@ class MainWindow(QMainWindow):
             self._current_color = color
             self._update_color_btn()
 
+    def _ensure_direct_mode(self) -> None:
+        if self._in_direct_mode or not self._device:
+            return
+        try:
+            self._device.effect("direct")
+            self._device.brightness(self._brightness.value())
+            self._in_direct_mode = True
+            self._effect_combo.blockSignals(True)
+            idx = self._effect_combo.findText("direct")
+            if idx >= 0:
+                self._effect_combo.setCurrentIndex(idx)
+            self._effect_combo.blockSignals(False)
+        except Exception:
+            pass
+
     def _on_key_clicked(self, row: int, col: int) -> None:
         current = self._kb_widget._colors.get((row, col))
         is_active = current and (current.red() or current.green() or current.blue())
 
         if is_active and current == self._current_color:
-            # Toggle off
             self._kb_widget.set_key_color(row, col, QColor(0, 0, 0))
             if self._device:
+                self._ensure_direct_mode()
                 try:
                     self._device.set_key(row, col, 0, 0, 0)
                 except Exception:
@@ -184,9 +200,9 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"Key ({row},{col}) off")
             return
 
-        # Set color
         self._kb_widget.set_key_color(row, col, self._current_color)
         if self._device:
+            self._ensure_direct_mode()
             try:
                 self._device.set_key(
                     row, col, self._current_color.red(), self._current_color.green(), self._current_color.blue()
@@ -229,6 +245,7 @@ class MainWindow(QMainWindow):
     def _on_effect_changed(self, effect: str) -> None:
         if not self._device or not effect:
             return
+        self._in_direct_mode = effect == "direct"
         try:
             self._device.brightness(self._brightness.value())
             self._device.speed(self._speed.value())
