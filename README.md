@@ -78,10 +78,30 @@ That's it. No boilerplate, no subclassing, no transport code.
 
 **Sequence numbers** - `_next_seq()` for transactional protocols (Logitech, Corsair).
 
+**CLI** - `hidproto` command with auto-generated subcommands per protocol. Each effect gets its own `--help` with only the relevant options.
+
+## CLI
+
+```bash
+hidproto devices                                    # list connected HID devices
+hidproto info ite8910                               # show commands, effects, matrix size
+hidproto ite8910 wave -d right -b 8 -s 5            # wave rainbow, right, brightness 8
+hidproto ite8910 wave -d left -c ff0000             # wave red, left
+hidproto ite8910 breathing -c 00ff00 -b 8           # breathing green
+hidproto ite8910 scan -c ff0000 --color2 0000ff     # scan red + blue
+hidproto ite8910 snake -d down_right -c 0000ff      # snake blue, diagonal
+hidproto ite8910 off                                # turn off
+hidproto ite8910 brightness 8                       # set brightness only
+hidproto ite8910 speed 5                            # set speed only
+```
+
+Options are generated from the protocol definition. `wave --help` shows `--direction` with valid choices, `scan --help` shows `--color` and `--color2`, `spectrum_cycle --help` shows only brightness/speed.
+
 ## Architecture
 
 ```
 hidproto/
+  cli.py         Click CLI with auto-generated subcommands
   command.py     CommandSpec + @command descriptor
   effect.py      EffectSpec + declarative effect dispatch
   protocol.py    HIDProtocol base class (report building, transport)
