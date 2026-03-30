@@ -76,8 +76,8 @@ def test_list_commands() -> None:
     cmds = FakeProto.list_commands()
     assert "simple" in cmds
     assert "custom" in cmds
-    assert cmds["simple"].opcode == 0x01
-    assert cmds["custom"].opcode == 0x09
+    assert cmds["simple"].opcode == (0x01,)
+    assert cmds["custom"].opcode == (0x09,)
 
 
 def test_command_doc() -> None:

@@ -16,7 +16,7 @@ class CommandSpec:
 
     Attributes:
         name: Method name (set by metaclass).
-        opcode: Command byte.
+        opcode: Command byte(s) - single or multiple (e.g. command_class + command_id).
         args: Number of data bytes after the opcode.
         doc: Human-readable description.
         use_feature: True for feature reports (ioctl), False for output reports.
@@ -24,7 +24,7 @@ class CommandSpec:
     """
 
     name: str
-    opcode: int
+    opcode: tuple[int, ...]
     args: int = 0
     doc: str = ""
     use_feature: bool = True
@@ -63,8 +63,7 @@ class command:
 
     def __init__(
         self,
-        opcode: int,
-        *,
+        *opcode: int,
         args: int = 0,
         doc: str = "",
         feature: bool = True,
@@ -96,11 +95,11 @@ class command:
         )
 
     def _make_auto_method(self, name: str) -> Callable[..., bytes]:
-        """Generate a method that builds a report from opcode + args."""
+        """Generate a method that builds a report from opcode(s) + args."""
         opcode = self.opcode
 
         def auto_method(proto_self: HIDProtocol, *args: int) -> bytes:
-            return proto_self._report(opcode, *args)
+            return proto_self._report(*opcode, *args)
 
         auto_method.__name__ = name
         auto_method.__qualname__ = name
@@ -113,9 +112,7 @@ class command:
     @overload
     def __get__(self, obj: Any, objtype: type | None) -> Callable[..., bytes]: ...
 
-    def __get__(
-        self, obj: Any, objtype: type | None = None
-    ) -> command | Callable[..., bytes]:
+    def __get__(self, obj: Any, objtype: type | None = None) -> command | Callable[..., bytes]:
         if obj is None:
             return self
         if self._builder:
