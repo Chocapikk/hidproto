@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hidproto"
-version = "0.1.1"
+version = "0.2.0"
 description = "A Python DSL for HID device protocols on Linux"
 authors = ["Chocapikk <balgogan@protonmail.com>"]
 readme = "README.md"
