@@ -57,7 +57,7 @@ class HyperXProtocol(HIDProtocol):
         "wave": effect(
             "wave",
             steps=(step("set_effect", 0x00, 0x00, 0x05, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00),),
-            directions=_DIRECTIONS,
+            directions=True,
         ),
         "wave_right": effect(
             "wave_right", steps=(step("set_effect", 0x00, 0x00, 0x05, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00),)
@@ -115,5 +115,8 @@ if __name__ == "__main__":
 
     print("Effects:")
     for name, spec in HyperXProtocol.effects.items():
-        extra = f"  directions: {', '.join(spec.directions)}" if spec.directions else ""
+        from hidproto.effect import resolve_directions
+
+        dirs = resolve_directions(proto, spec)
+        extra = f"  directions: {', '.join(dirs)}" if dirs else ""
         print(f"  {name:16s}  {len(spec.steps)} steps{extra}")

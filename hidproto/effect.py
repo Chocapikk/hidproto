@@ -44,7 +44,7 @@ class EffectSpec:
     animation: int | None = None
     color_cmd: str | None = None
     slot_cmd: str | None = None
-    directions: tuple[str, ...] = ()
+    directions: tuple[str, ...] | bool = ()
     color_slots: int = 0
     needs_clear: bool = False
     clear_animation: int = 0x0C
@@ -62,7 +62,7 @@ def effect(
     animation: int | None = None,
     color_cmd: str | None = None,
     slot_cmd: str | None = None,
-    directions: tuple[str, ...] = (),
+    directions: tuple[str, ...] | bool = (),
     color_slots: int = 0,
     needs_clear: bool = False,
     clear_animation: int = 0x0C,
@@ -80,6 +80,15 @@ def effect(
         clear_animation=clear_animation,
         steps=steps,
     )
+
+
+def resolve_directions(proto: HIDProtocol, spec: EffectSpec) -> tuple[str, ...]:
+    """Resolve effect directions. True means use protocol.directions."""
+    if spec.directions is True:
+        return getattr(proto, "directions", ())
+    if spec.directions:
+        return spec.directions
+    return ()
 
 
 def _build_clear(proto: HIDProtocol, clear_anim: int) -> list[bytes]:
@@ -109,11 +118,12 @@ def _build_slots(
 ) -> list[bytes]:
     """Build directional or multi-slot reports."""
     cmd = getattr(proto, spec.slot_cmd)
+    dirs = resolve_directions(proto, spec)
 
-    if spec.directions:
-        dir_name = direction if direction else spec.directions[0]
+    if dirs:
+        dir_name = direction if direction else dirs[0]
         color = colors[0] if colors else None
-        return [cmd(*proto.dir_slot(dir_name, spec.directions, color))]
+        return [cmd(*proto.dir_slot(dir_name, dirs, color))]
 
     reports: list[bytes] = []
     for i, c in enumerate(colors[: spec.color_slots]):

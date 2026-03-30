@@ -10,6 +10,7 @@ import click
 
 from .device import HIDDevice
 from .discovery import list_devices
+from .effect import resolve_directions
 from .protocol import HIDProtocol
 
 
@@ -85,8 +86,10 @@ def info(protocol: str) -> None:
         click.echo("Effects:")
         for name, spec in effects.items():
             parts = []
-            if spec.directions:
-                parts.append(f"directions: {', '.join(spec.directions)}")
+            # Need a dummy proto for resolve_directions
+            dirs = resolve_directions(proto_cls, spec)
+            if dirs:
+                parts.append(f"directions: {', '.join(dirs)}")
             if spec.color_slots:
                 parts.append(f"colors: {spec.color_slots}")
             if spec.needs_clear:
@@ -138,12 +141,14 @@ def _register_effect(
 
     params: list[click.Parameter] = []
 
-    if spec.directions:
+    dirs = resolve_directions(proto_cls, spec)
+
+    if dirs:
         params.append(
             click.Option(
                 ["--direction", "-d"],
-                type=click.Choice(list(spec.directions)),
-                default=spec.directions[0],
+                type=click.Choice(list(dirs)),
+                default=dirs[0],
                 help="Direction",
                 show_default=True,
             )

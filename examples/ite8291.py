@@ -23,15 +23,15 @@ class ITE8291Protocol(HIDProtocol):
     SET_EFFECT: [8, control, effect, speed, brightness, color, direction, save]
     """
 
-    vendor_id    = 0x048D
-    product_id   = 0x600B
-    report_id    = 0x00
-    report_size  = 8
-    rows         = 6
-    cols         = 21
+    vendor_id = 0x048D
+    product_id = 0x600B
+    report_id = 0x00
+    report_size = 8
+    rows = 6
+    cols = 21
 
-    preset_base  = 0x00
-    custom_base  = 0x00
+    preset_base = 0x00
+    custom_base = 0x00
     color_custom = 0x00
 
     directions = _DIRECTIONS
@@ -46,47 +46,27 @@ class ITE8291Protocol(HIDProtocol):
 
     # Commands
     # SET_EFFECT: [8, control, effect, speed, brightness, color, direction, save]
-    set_effect_cmd    = command(8, args=7, doc="Set effect")
-    set_brightness    = command(9, args=2, doc="Set brightness")
+    set_effect_cmd = command(8, args=7, doc="Set effect")
+    set_brightness = command(9, args=2, doc="Set brightness")
     set_palette_color = command(20, args=4, doc="Set palette color")
-    set_row_index     = command(22, 0x00, args=1, doc="Set row index")
-    get_fw_version    = command(128, doc="Get firmware version")
-    get_effect_cmd    = command(136, doc="Get current effect")
+    set_row_index = command(22, 0x00, args=1, doc="Set row index")
+    get_fw_version = command(128, doc="Get firmware version")
+    get_effect_cmd = command(136, doc="Get current effect")
 
     # Effects
     # set_effect_cmd args: [control, effect_id, speed, brightness, color, direction, save]
     # Default: control=0x02, speed=5, brightness=25, color=8(random), direction=1(right), save=0
     effects = {
-        "breathing": effect("breathing", steps=(
-            step("set_effect_cmd", 0x02, 0x02, 5, 25, 8, 0, 0),
-        )),
-        "wave": effect("wave", steps=(
-            step("set_effect_cmd", 0x02, 0x03, 5, 25, 0, 1, 0),
-        ), directions=_DIRECTIONS),
-        "random": effect("random", steps=(
-            step("set_effect_cmd", 0x02, 0x04, 5, 25, 8, 0, 0),
-        )),
-        "rainbow": effect("rainbow", steps=(
-            step("set_effect_cmd", 0x02, 0x05, 0, 25, 0, 0, 0),
-        )),
-        "ripple": effect("ripple", steps=(
-            step("set_effect_cmd", 0x02, 0x06, 5, 25, 8, 0, 0),
-        )),
-        "marquee": effect("marquee", steps=(
-            step("set_effect_cmd", 0x02, 0x09, 5, 25, 0, 0, 0),
-        )),
-        "raindrop": effect("raindrop", steps=(
-            step("set_effect_cmd", 0x02, 0x0A, 5, 25, 8, 0, 0),
-        )),
-        "aurora": effect("aurora", steps=(
-            step("set_effect_cmd", 0x02, 0x0E, 5, 25, 8, 0, 0),
-        )),
-        "fireworks": effect("fireworks", steps=(
-            step("set_effect_cmd", 0x02, 0x11, 5, 25, 8, 0, 0),
-        )),
-        "off": effect("off", steps=(
-            step("set_effect_cmd", 0x01, 0, 0, 0, 0, 0, 0),
-        )),
+        "breathing": effect("breathing", steps=(step("set_effect_cmd", 0x02, 0x02, 5, 25, 8, 0, 0),)),
+        "wave": effect("wave", steps=(step("set_effect_cmd", 0x02, 0x03, 5, 25, 0, 1, 0),), directions=True),
+        "random": effect("random", steps=(step("set_effect_cmd", 0x02, 0x04, 5, 25, 8, 0, 0),)),
+        "rainbow": effect("rainbow", steps=(step("set_effect_cmd", 0x02, 0x05, 0, 25, 0, 0, 0),)),
+        "ripple": effect("ripple", steps=(step("set_effect_cmd", 0x02, 0x06, 5, 25, 8, 0, 0),)),
+        "marquee": effect("marquee", steps=(step("set_effect_cmd", 0x02, 0x09, 5, 25, 0, 0, 0),)),
+        "raindrop": effect("raindrop", steps=(step("set_effect_cmd", 0x02, 0x0A, 5, 25, 8, 0, 0),)),
+        "aurora": effect("aurora", steps=(step("set_effect_cmd", 0x02, 0x0E, 5, 25, 8, 0, 0),)),
+        "fireworks": effect("fireworks", steps=(step("set_effect_cmd", 0x02, 0x11, 5, 25, 8, 0, 0),)),
+        "off": effect("off", steps=(step("set_effect_cmd", 0x01, 0, 0, 0, 0, 0, 0),)),
     }
 
 
@@ -123,5 +103,8 @@ if __name__ == "__main__":
 
     print("Effects:")
     for name, spec in ITE8291Protocol.effects.items():
-        extra = f"  directions: {', '.join(spec.directions)}" if spec.directions else ""
+        from hidproto.effect import resolve_directions
+
+        dirs = resolve_directions(proto, spec)
+        extra = f"  directions: {', '.join(dirs)}" if dirs else ""
         print(f"  {name:12s}  {len(spec.steps)} steps{extra}")
