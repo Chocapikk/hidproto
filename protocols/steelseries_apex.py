@@ -13,7 +13,7 @@ Usage::
 from hidproto import HIDDevice, HIDProtocol, command, effect, step
 
 
-class SteelSeriesProtocol(HIDProtocol):
+class SteelSeriesApexProtocol(HIDProtocol):
     """SteelSeries Apex - 65-byte feature reports (643 for direct mode).
 
     Packets: [0x00, packet_id, ...data..., zero-padded]
@@ -65,14 +65,14 @@ class SteelSeriesProtocol(HIDProtocol):
     }
 
 
-SteelSeries = HIDDevice.for_protocol(SteelSeriesProtocol)
+SteelSeriesApex = HIDDevice.for_protocol(SteelSeriesApexProtocol)
 
 
 if __name__ == "__main__":
     print("SteelSeries protocol - report verification (no device needed)")
     print()
 
-    proto = SteelSeriesProtocol.__new__(SteelSeriesProtocol)
+    proto = SteelSeriesApexProtocol.__new__(SteelSeriesApexProtocol)
     proto.report_id = 0x00
     proto.report_size = 65
     proto._seq = 0
@@ -99,11 +99,11 @@ if __name__ == "__main__":
     print()
 
     print("Commands:")
-    for name, spec in SteelSeriesProtocol.list_commands().items():
+    for name, spec in SteelSeriesApexProtocol.list_commands().items():
         feat = "feature" if spec.use_feature else "output"
         print(f"  {name:16s}  [{feat}]  {spec.doc}")
 
     print()
     print("Effects:")
-    for name, spec in SteelSeriesProtocol.effects.items():
+    for name, spec in SteelSeriesApexProtocol.effects.items():
         print(f"  {name:12s}  {len(spec.steps)} steps")

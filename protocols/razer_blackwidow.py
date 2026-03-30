@@ -18,7 +18,7 @@ Usage::
 from hidproto import HIDDevice, HIDProtocol, command, effect, step, xor_checksum
 
 
-class RazerProtocol(HIDProtocol):
+class RazerBlackWidowProtocol(HIDProtocol):
     """Razer HID protocol - 90-byte feature reports with XOR checksum.
 
     Report layout:
@@ -89,14 +89,14 @@ class RazerProtocol(HIDProtocol):
     }
 
 
-Razer = HIDDevice.for_protocol(RazerProtocol)
+RazerBlackWidow = HIDDevice.for_protocol(RazerBlackWidowProtocol)
 
 
 if __name__ == "__main__":
     print("Razer protocol - report verification (no device needed)")
     print()
 
-    proto = RazerProtocol.__new__(RazerProtocol)
+    proto = RazerBlackWidowProtocol.__new__(RazerBlackWidowProtocol)
     proto.report_id = 0x00
     proto.report_size = 90
     proto.transaction_id = 0x1F
@@ -122,10 +122,10 @@ if __name__ == "__main__":
     print()
 
     print("Commands:")
-    for name, spec in RazerProtocol.list_commands().items():
+    for name, spec in RazerBlackWidowProtocol.list_commands().items():
         print(f"  {name}: opcode={tuple(hex(x) for x in spec.opcode)} - {spec.doc}")
 
     print()
     print("Effects:")
-    for name, spec in RazerProtocol.effects.items():
+    for name, spec in RazerBlackWidowProtocol.effects.items():
         print(f"  {name}: {len(spec.steps)} steps")

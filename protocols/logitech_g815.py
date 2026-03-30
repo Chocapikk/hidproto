@@ -5,7 +5,7 @@ Logitech uses a feature-based protocol where each capability has a
 feature index + command ID. Two report formats: short (0x10, 7B) and
 long (0x11, 20B).
 
-Protocol reference: OpenRGB LogitechProtocolCommon, libratbag.
+Protocol reference: OpenRGB LogitechG815ProtocolCommon, libratbag.
 
 Usage::
 
@@ -19,7 +19,7 @@ Usage::
 from hidproto import HIDDevice, HIDProtocol, command, effect, step
 
 
-class LogitechProtocol(HIDProtocol):
+class LogitechG815Protocol(HIDProtocol):
     """Logitech HID++ FAP protocol.
 
     Short message: [0x10, device_index, feature_index, command, data[3]]  (7 bytes)
@@ -96,14 +96,14 @@ class LogitechProtocol(HIDProtocol):
     # fmt: on
 
 
-Logitech = HIDDevice.for_protocol(LogitechProtocol)
+LogitechG815 = HIDDevice.for_protocol(LogitechG815Protocol)
 
 
 if __name__ == "__main__":
     print("Logitech HID++ protocol - report verification (no device needed)")
     print()
 
-    proto = LogitechProtocol.__new__(LogitechProtocol)
+    proto = LogitechG815Protocol.__new__(LogitechG815Protocol)
     proto.report_id = 0x11
     proto.report_size = 20
     proto.device_index = 0xFF
@@ -133,5 +133,5 @@ if __name__ == "__main__":
     print()
 
     print("Effects:")
-    for name, spec in LogitechProtocol.effects.items():
+    for name, spec in LogitechG815Protocol.effects.items():
         print(f"  {name:12s}  {len(spec.steps)} steps")

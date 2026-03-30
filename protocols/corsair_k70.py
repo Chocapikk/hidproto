@@ -17,7 +17,7 @@ Usage::
 from hidproto import HIDDevice, HIDProtocol, command, effect, step
 
 
-class CorsairProtocol(HIDProtocol):
+class CorsairK70Protocol(HIDProtocol):
     """Corsair Peripheral - 65-byte output reports via hid_write."""
 
     vendor_id = 0x1B1C
@@ -128,14 +128,14 @@ class CorsairProtocol(HIDProtocol):
     }
 
 
-Corsair = HIDDevice.for_protocol(CorsairProtocol)
+CorsairK70 = HIDDevice.for_protocol(CorsairK70Protocol)
 
 
 if __name__ == "__main__":
     print("Corsair protocol - report verification (no device needed)")
     print()
 
-    proto = CorsairProtocol.__new__(CorsairProtocol)
+    proto = CorsairK70Protocol.__new__(CorsairK70Protocol)
     proto.report_id = 0x00
     proto.report_size = 65
     proto._seq = 0
@@ -163,11 +163,11 @@ if __name__ == "__main__":
     print()
 
     print("Commands:")
-    for name, spec in CorsairProtocol.list_commands().items():
+    for name, spec in CorsairK70Protocol.list_commands().items():
         feat = "feature" if spec.use_feature else "output"
         print(f"  {name:20s}  [{feat}]  {spec.doc}")
 
     print()
     print("Effects (multi-step):")
-    for name, spec in CorsairProtocol.effects.items():
+    for name, spec in CorsairK70Protocol.effects.items():
         print(f"  {name:20s}  {len(spec.steps)} steps")

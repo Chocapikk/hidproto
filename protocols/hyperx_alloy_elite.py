@@ -16,7 +16,7 @@ from hidproto import HIDDevice, HIDProtocol, command, effect, step
 _DIRECTIONS = ("right", "left", "up", "down", "in", "out")
 
 
-class HyperXProtocol(HIDProtocol):
+class HyperXAlloyEliteProtocol(HIDProtocol):
     """HyperX Alloy Elite RGB - 65-byte feature reports.
 
     Packet structure: [0x00, packet_id, ...data..., zero-padded to 65 bytes]
@@ -83,14 +83,14 @@ class HyperXProtocol(HIDProtocol):
     }
 
 
-HyperX = HIDDevice.for_protocol(HyperXProtocol)
+HyperXAlloyElite = HIDDevice.for_protocol(HyperXAlloyEliteProtocol)
 
 
 if __name__ == "__main__":
     print("HyperX protocol - report verification (no device needed)")
     print()
 
-    proto = HyperXProtocol.__new__(HyperXProtocol)
+    proto = HyperXAlloyEliteProtocol.__new__(HyperXAlloyEliteProtocol)
     proto.report_id = 0x00
     proto.report_size = 65
     proto._seq = 0
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     print()
 
     print("Effects:")
-    for name, spec in HyperXProtocol.effects.items():
+    for name, spec in HyperXAlloyEliteProtocol.effects.items():
         from hidproto.effect import resolve_directions
 
         dirs = resolve_directions(proto, spec)
