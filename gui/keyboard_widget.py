@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, QRectF
-from PySide6.QtGui import QColor, QPainter, QFont, QPen
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
 from .layouts import Key
@@ -12,9 +12,9 @@ from .layouts import Key
 class KeyboardWidget(QWidget):
     """Renders a keyboard layout with per-key colors."""
 
-    UNIT = 50          # pixels per key unit
-    GAP = 3            # gap between keys
-    MARGIN = 15        # margin around keyboard
+    UNIT = 50  # pixels per key unit
+    GAP = 3  # gap between keys
+    MARGIN = 15  # margin around keyboard
     CORNER_RADIUS = 5  # key corner radius
 
     def __init__(self, layout: list[Key], parent: QWidget | None = None) -> None:
@@ -37,6 +37,7 @@ class KeyboardWidget(QWidget):
 
     def sizeHint(self):
         from PySide6.QtCore import QSize
+
         return QSize(self._width, self._height)
 
     def set_key_color(self, row: int, col: int, color: QColor) -> None:

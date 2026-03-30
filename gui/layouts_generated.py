@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Key:
     """A key in the keyboard layout."""
+
     label: str
     row: int
     col: int

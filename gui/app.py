@@ -18,8 +18,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from hidproto.registry import discover
 from hidproto.device import HIDDevice
+from hidproto.registry import discover
 
 from .keyboard_widget import KeyboardWidget
 from .layouts import ANSI_FULL
