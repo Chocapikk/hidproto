@@ -170,6 +170,21 @@ class MainWindow(QMainWindow):
             self._update_color_btn()
 
     def _on_key_clicked(self, row: int, col: int) -> None:
+        current = self._kb_widget._colors.get((row, col))
+        is_active = current and (current.red() or current.green() or current.blue())
+
+        if is_active and current == self._current_color:
+            # Toggle off
+            self._kb_widget.set_key_color(row, col, QColor(0, 0, 0))
+            if self._device:
+                try:
+                    self._device.set_key(row, col, 0, 0, 0)
+                except Exception:
+                    pass
+            self.statusBar().showMessage(f"Key ({row},{col}) off")
+            return
+
+        # Set color
         self._kb_widget.set_key_color(row, col, self._current_color)
         if self._device:
             try:
@@ -224,6 +239,7 @@ class MainWindow(QMainWindow):
 
     def _on_brightness_changed(self, value: int) -> None:
         self._brightness_label.setText(str(value))
+        self._kb_widget.set_brightness(value / 10.0)
         if self._device:
             try:
                 self._device.brightness(value)

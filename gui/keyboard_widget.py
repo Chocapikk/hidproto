@@ -24,9 +24,14 @@ class KeyboardWidget(QWidget):
         self._layout = layout
         self._colors: dict[tuple[int, int], QColor] = {}
         self._hover_key: tuple[int, int] | None = None
+        self._brightness: float = 1.0  # 0.0 to 1.0
         self._compute_size()
         self.setMinimumSize(self.sizeHint())
         self.setMouseTracking(True)
+
+    def set_brightness(self, value: float) -> None:
+        self._brightness = max(0.0, min(1.0, value))
+        self.update()
 
     def _compute_size(self) -> None:
         max_x = 0.0
@@ -106,15 +111,19 @@ class KeyboardWidget(QWidget):
             p.setBrush(bg)
             p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
 
-            # LED glow on borders
+            # LED glow on borders (scaled by brightness)
             color = self._colors.get((k.row, k.col))
             if color and (color.red() or color.green() or color.blue()):
-                p.setPen(QPen(color, 3))
+                br = self._brightness
+                scaled = QColor(
+                    int(color.red() * br), int(color.green() * br), int(color.blue() * br)
+                )
+                p.setPen(QPen(scaled, 3))
                 p.setBrush(Qt.NoBrush)
-                p.setOpacity(0.9)
+                p.setOpacity(0.9 * br)
                 p.drawRoundedRect(rect.adjusted(1, 1, -1, -1), self.CORNER_RADIUS, self.CORNER_RADIUS)
-                p.setOpacity(0.3)
-                p.setPen(QPen(color, 6))
+                p.setOpacity(0.3 * br)
+                p.setPen(QPen(scaled, 6))
                 p.drawRoundedRect(rect.adjusted(2, 2, -2, -2), self.CORNER_RADIUS - 1, self.CORNER_RADIUS - 1)
                 p.setOpacity(1.0)
 
