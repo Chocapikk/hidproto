@@ -32,7 +32,7 @@ hidproto-gui = "gui.app:main"
 python = "^3.10"
 click = "^8.0"
 hidapi = {version = "^0.14", optional = true}
-PySide6 = {version = "^6.5", optional = true}
+PySide6 = {version = "^6.5", optional = true, python = ">=3.10,<3.14"}
 
 [tool.poetry.extras]
 hidapi = ["hidapi"]
