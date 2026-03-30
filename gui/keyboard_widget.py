@@ -106,20 +106,24 @@ class KeyboardWidget(QWidget):
             p.setBrush(bg)
             p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
 
-            # LED color
+            # LED glow on borders
             color = self._colors.get((k.row, k.col))
             if color and (color.red() or color.green() or color.blue()):
-                p.setBrush(color)
-                p.setOpacity(0.8)
-                inner = QRectF(rect.x() + 3, rect.y() + 3, rect.width() - 6, rect.height() - 6)
-                p.drawRoundedRect(inner, self.CORNER_RADIUS - 1, self.CORNER_RADIUS - 1)
+                p.setPen(QPen(color, 3))
+                p.setBrush(Qt.NoBrush)
+                p.setOpacity(0.9)
+                p.drawRoundedRect(rect.adjusted(1, 1, -1, -1), self.CORNER_RADIUS, self.CORNER_RADIUS)
+                p.setOpacity(0.3)
+                p.setPen(QPen(color, 6))
+                p.drawRoundedRect(rect.adjusted(2, 2, -2, -2), self.CORNER_RADIUS - 1, self.CORNER_RADIUS - 1)
                 p.setOpacity(1.0)
 
             # Border
-            border_color = QColor(100, 100, 100) if is_hover else QColor(55, 55, 55)
-            p.setPen(QPen(border_color, 1.5 if is_hover else 1))
-            p.setBrush(Qt.NoBrush)
-            p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
+            if not (color and (color.red() or color.green() or color.blue())):
+                border_color = QColor(100, 100, 100) if is_hover else QColor(55, 55, 55)
+                p.setPen(QPen(border_color, 1.5 if is_hover else 1))
+                p.setBrush(Qt.NoBrush)
+                p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
 
             # Label
             label_color = QColor(220, 220, 220) if is_hover else QColor(180, 180, 180)
