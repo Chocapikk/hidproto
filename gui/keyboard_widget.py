@@ -115,9 +115,7 @@ class KeyboardWidget(QWidget):
             color = self._colors.get((k.row, k.col))
             if color and (color.red() or color.green() or color.blue()):
                 br = self._brightness
-                scaled = QColor(
-                    int(color.red() * br), int(color.green() * br), int(color.blue() * br)
-                )
+                scaled = QColor(int(color.red() * br), int(color.green() * br), int(color.blue() * br))
                 p.setPen(QPen(scaled, 3))
                 p.setBrush(Qt.NoBrush)
                 p.setOpacity(0.9 * br)
