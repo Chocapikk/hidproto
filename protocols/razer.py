@@ -26,21 +26,21 @@ class RazerProtocol(HIDProtocol):
      protocol_type, data_size, command_class, command_id, args[80], crc, reserved]
     """
 
-    vendor_id      = 0x1532
-    product_id     = 0x0000  # override per device
-    report_id      = 0x00
-    report_size    = 90
-    rows           = 6
-    cols           = 22
+    vendor_id = 0x1532
+    product_id = 0x0000  # override per device
+    report_id = 0x00
+    report_size = 90
+    rows = 6
+    cols = 22
 
-    preset_base    = 0x00
-    custom_base    = 0x00
-    color_custom   = 0x00
+    preset_base = 0x00
+    custom_base = 0x00
+    color_custom = 0x00
     transaction_id = 0x1F
 
     # Storage + LED defaults baked into commands
     storage = 0x05
-    led_id  = 0x00
+    led_id = 0x00
 
     def _report(self, *data: int) -> bytes:
         """Build a Razer report with XOR checksum.
@@ -65,35 +65,27 @@ class RazerProtocol(HIDProtocol):
 
     # Commands
     # static: class=0x0F, id=0x02, args=[storage, led, 0x01, 0, 0, 0x01, R, G, B]
-    static_extended    = command(0x0F, 0x02, args=9, doc="Static color")
+    static_extended = command(0x0F, 0x02, args=9, doc="Static color")
     # wave: class=0x0F, id=0x02, args=[storage, led, 0x04, 0, 0, direction]
-    wave_extended      = command(0x0F, 0x02, args=6, doc="Wave effect")
+    wave_extended = command(0x0F, 0x02, args=6, doc="Wave effect")
     # breathing: class=0x0F, id=0x02, args=[storage, led, 0x02]
-    breathing_random   = command(0x0F, 0x02, args=3, doc="Breathing random")
+    breathing_random = command(0x0F, 0x02, args=3, doc="Breathing random")
     # spectrum: class=0x0F, id=0x02, args=[storage, led, 0x03]
-    spectrum_extended  = command(0x0F, 0x02, args=3, doc="Spectrum cycle")
+    spectrum_extended = command(0x0F, 0x02, args=3, doc="Spectrum cycle")
     # off: class=0x0F, id=0x02, args=[storage, led, 0x00]
-    none_extended      = command(0x0F, 0x02, args=3, doc="Off")
+    none_extended = command(0x0F, 0x02, args=3, doc="Off")
     # brightness: class=0x0F, id=0x04, args=[storage, led, brightness]
-    brightness_cmd     = command(0x0F, 0x04, args=3, doc="Set brightness")
+    brightness_cmd = command(0x0F, 0x04, args=3, doc="Set brightness")
 
     # Effects (single-step, args include storage + led_id)
     effects = {
-        "static": effect("static", steps=(
-            step("static_extended", 0x05, 0x00, 0x01, 0x00, 0x00, 0x01, 0xFF, 0xFF, 0xFF),
-        )),
-        "wave": effect("wave", steps=(
-            step("wave_extended", 0x05, 0x00, 0x04, 0x00, 0x00, 0x01),
-        )),
-        "breathing": effect("breathing", steps=(
-            step("breathing_random", 0x05, 0x00, 0x02),
-        )),
-        "spectrum": effect("spectrum", steps=(
-            step("spectrum_extended", 0x05, 0x00, 0x03),
-        )),
-        "off": effect("off", steps=(
-            step("none_extended", 0x05, 0x00, 0x00),
-        )),
+        "static": effect(
+            "static", steps=(step("static_extended", 0x05, 0x00, 0x01, 0x00, 0x00, 0x01, 0xFF, 0xFF, 0xFF),)
+        ),
+        "wave": effect("wave", steps=(step("wave_extended", 0x05, 0x00, 0x04, 0x00, 0x00, 0x01),)),
+        "breathing": effect("breathing", steps=(step("breathing_random", 0x05, 0x00, 0x02),)),
+        "spectrum": effect("spectrum", steps=(step("spectrum_extended", 0x05, 0x00, 0x03),)),
+        "off": effect("off", steps=(step("none_extended", 0x05, 0x00, 0x00),)),
     }
 
 

@@ -19,10 +19,10 @@ from hidproto import HIDDevice, HIDProtocol, command
 class ITE8297Protocol(HIDProtocol):
     """ITE 8297 - 64-byte HID feature reports, uniform color only."""
 
-    vendor_id    = 0x048D
-    product_id   = 0x8297
-    report_id    = 0xCC
-    report_size  = 64
+    vendor_id = 0x048D
+    product_id = 0x8297
+    report_id = 0xCC
+    report_size = 64
 
     # [CC, B0, 01, 01, R, G, B, 0x00...]
     set_color_cmd = command(0xB0, 0x01, 0x01, args=3, doc="Uniform RGB color")

@@ -113,7 +113,7 @@ hidproto/
 
 ## Examples
 
-See `examples/ite8910.py` for a complete ITE 8910 keyboard RGB implementation: 9 commands, 11 effects, 8 wave directions, 4 snake diagonals, per-key color. All in ~70 lines of data.
+See `protocols/ite8910.py` for a complete ITE 8910 keyboard RGB implementation: 9 commands, 11 effects, 8 wave directions, 4 snake diagonals, per-key color. All in ~70 lines of data.
 
 ## License
 

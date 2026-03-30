@@ -17,7 +17,7 @@ from .protocol import HIDProtocol
 def _find_protocols() -> dict[str, type[HIDProtocol]]:
     """Discover protocol classes from examples/."""
     protocols: dict[str, type[HIDProtocol]] = {}
-    examples_dir = Path(__file__).parent.parent / "examples"
+    examples_dir = Path(__file__).parent.parent / "protocols"
 
     if not examples_dir.exists():
         return protocols
@@ -28,7 +28,7 @@ def _find_protocols() -> dict[str, type[HIDProtocol]]:
         if f.name.startswith("_"):
             continue
         try:
-            mod = importlib.import_module(f"examples.{f.stem}")
+            mod = importlib.import_module(f"protocols.{f.stem}")
         except Exception:
             continue
 
