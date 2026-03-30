@@ -10,6 +10,21 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
+class Step:
+    """A single step in a multi-step effect sequence.
+
+    Attributes:
+        cmd: Command method name on the protocol.
+        args: Fixed args to pass. Use None as placeholder for runtime values.
+        use_feature: If False, use _write instead of _send.
+    """
+
+    cmd: str
+    args: tuple[int, ...] = ()
+    use_feature: bool = True
+
+
+@dataclass(frozen=True)
 class EffectSpec:
     """Declarative effect definition.
 
@@ -21,7 +36,8 @@ class EffectSpec:
         directions: Valid direction names, or empty.
         color_slots: Number of color slots (0, 1, or 2).
         needs_clear: Send clear animation + black to all LEDs first.
-        clear_animation: Animation ID used for clearing (default 0x0C).
+        clear_animation: Animation ID used for clearing.
+        steps: Ordered list of Steps for multi-step effects.
     """
 
     name: str
@@ -32,6 +48,12 @@ class EffectSpec:
     color_slots: int = 0
     needs_clear: bool = False
     clear_animation: int = 0x0C
+    steps: tuple[Step, ...] = ()
+
+
+def step(cmd: str, *args: int, use_feature: bool = True) -> Step:
+    """Create a step in a multi-step effect."""
+    return Step(cmd=cmd, args=args, use_feature=use_feature)
 
 
 def effect(
@@ -44,6 +66,7 @@ def effect(
     color_slots: int = 0,
     needs_clear: bool = False,
     clear_animation: int = 0x0C,
+    steps: tuple[Step, ...] = (),
 ) -> EffectSpec:
     """Create a declarative effect definition."""
     return EffectSpec(
@@ -55,6 +78,7 @@ def effect(
         color_slots=color_slots,
         needs_clear=needs_clear,
         clear_animation=clear_animation,
+        steps=steps,
     )
 
 
@@ -67,9 +91,7 @@ def _build_clear(proto: HIDProtocol, clear_anim: int) -> list[bytes]:
     return reports
 
 
-def _build_color(
-    proto: HIDProtocol, spec: EffectSpec, colors: list[tuple[int, int, int]]
-) -> list[bytes]:
+def _build_color(proto: HIDProtocol, spec: EffectSpec, colors: list[tuple[int, int, int]]) -> list[bytes]:
     """Build color/random reports for non-directional effects."""
     cmd = getattr(proto, spec.color_cmd)
     if colors:
@@ -99,6 +121,19 @@ def _build_slots(
     return reports
 
 
+def _build_steps(proto: HIDProtocol, spec: EffectSpec) -> list[tuple[bytes, bool]]:
+    """Build reports from multi-step sequence.
+
+    Returns list of (report, use_feature) tuples.
+    """
+    results: list[tuple[bytes, bool]] = []
+    for s in spec.steps:
+        cmd = getattr(proto, s.cmd)
+        report = cmd(*s.args)
+        results.append((report, s.use_feature))
+    return results
+
+
 def apply_effect(
     proto: HIDProtocol,
     spec: EffectSpec,
@@ -107,6 +142,9 @@ def apply_effect(
     direction: str | None = None,
 ) -> list[bytes]:
     """Build the full report sequence for an effect.
+
+    For multi-step effects (spec.steps), returns reports from the step
+    sequence. For simple effects, builds from animation/color/slot/clear.
 
     Args:
         proto: Protocol instance.
@@ -117,6 +155,12 @@ def apply_effect(
     Returns:
         Ordered list of reports to send.
     """
+    # Multi-step effects: execute steps in order
+    if spec.steps:
+        results = _build_steps(proto, spec)
+        # For now, return just the bytes (caller handles feature vs write)
+        return [r for r, _ in results]
+
     reports: list[bytes] = []
     colors = colors or []
 
