@@ -124,6 +124,16 @@ All options are auto-generated from the protocol definition. Each device gets it
 - **Checksums** - XOR (Razer, Das), SUM (Cherry), custom via `_with_checksum()`
 - **State caching** - skip redundant sends, invalidate on resume
 - **CLI** - Click-based with per-device subcommands
+- **GUI** - Qt keyboard visualizer with per-key editing, color picker, auto-connect, dynamic effect controls (directions, colors, random toggle), brightness glow rendering
+
+## GUI
+
+```bash
+pip install hidproto[gui]
+hidproto-gui
+```
+
+Auto-detects connected devices and shows the keyboard layout with per-key RGB editing. Effect controls (directions, color pickers, random toggle) are auto-generated from the protocol's EffectSpec.
 
 ## Architecture
 
@@ -139,6 +149,12 @@ hidproto/
   discovery.py         sysfs device discovery
   registry.py          Auto-discovery + entry point plugin system
   checksum.py          xor/sum checksum helpers
+  layout.py            Key dataclass for keyboard layouts
+
+gui/
+  app.py               Qt main window with auto-connect
+  keyboard_widget.py   Per-key RGB keyboard renderer
+  effect_panel.py      Dynamic effect controls from EffectSpec
 
 protocols/
   alienware/    asus/       cherry/     coolermaster/

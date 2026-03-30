@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hidproto"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Python DSL for HID device protocols. Cross-platform, zero boilerplate."
 authors = ["Chocapikk <balgogan@protonmail.com>"]
 readme = "README.md"
@@ -23,6 +23,7 @@ classifiers = [
 
 [tool.poetry.scripts]
 hidproto = "hidproto.cli:main"
+hidproto-gui = "gui.app:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/Chocapikk/hidproto/issues"
@@ -31,9 +32,11 @@ hidproto = "hidproto.cli:main"
 python = "^3.10"
 click = "^8.0"
 hidapi = {version = "^0.14", optional = true}
+PySide6 = {version = "^6.5", optional = true}
 
 [tool.poetry.extras]
 hidapi = ["hidapi"]
+gui = ["PySide6"]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9"
