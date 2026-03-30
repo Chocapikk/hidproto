@@ -166,8 +166,8 @@ class ITE8910Protocol(HIDProtocol):
         "random": effect("random", animation=0x09),
         "random_color": effect("random_color", animation=0x09, slot_cmd="random_color_cmd", color_slots=1),
         "scan": effect("scan", animation=0x0A, slot_cmd="scan_slot", color_slots=2),
-        "wave": effect("wave", animation=0x04, slot_cmd="wave_slot", directions=_WAVE),
-        "snake": effect("snake", animation=0x0B, slot_cmd="snake_slot", directions=_SNAKE),
+        "wave": effect("wave", animation=0x04, slot_cmd="wave_slot", directions=_WAVE, color_slots=1),
+        "snake": effect("snake", animation=0x0B, slot_cmd="snake_slot", directions=_SNAKE, color_slots=1),
     }
 
 
