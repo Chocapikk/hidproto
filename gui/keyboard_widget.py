@@ -2,27 +2,31 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QRectF, Qt
-from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
 from .layouts import Key
 
 
 class KeyboardWidget(QWidget):
-    """Renders a keyboard layout with per-key colors."""
+    """Renders a keyboard layout with per-key colors and click support."""
 
-    UNIT = 50  # pixels per key unit
-    GAP = 3  # gap between keys
-    MARGIN = 15  # margin around keyboard
-    CORNER_RADIUS = 5  # key corner radius
+    UNIT = 50
+    GAP = 3
+    MARGIN = 15
+    CORNER_RADIUS = 5
+
+    key_clicked = Signal(int, int)  # row, col
 
     def __init__(self, layout: list[Key], parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._layout = layout
         self._colors: dict[tuple[int, int], QColor] = {}
+        self._hover_key: tuple[int, int] | None = None
         self._compute_size()
         self.setMinimumSize(self.sizeHint())
+        self.setMouseTracking(True)
 
     def _compute_size(self) -> None:
         max_x = 0.0
@@ -54,6 +58,36 @@ class KeyboardWidget(QWidget):
         self._colors.clear()
         self.update()
 
+    def _key_rect(self, k: Key) -> QRectF:
+        px = self.MARGIN + int(k.x * (self.UNIT + self.GAP))
+        py = self.MARGIN + int(k.y * (self.UNIT + self.GAP))
+        pw = int(k.w * self.UNIT + max(0, k.w - 1) * self.GAP)
+        ph = int(k.h * self.UNIT + max(0, k.h - 1) * self.GAP)
+        return QRectF(px, py, pw, ph)
+
+    def _key_at(self, x: float, y: float) -> Key | None:
+        for k in self._layout:
+            if self._key_rect(k).contains(x, y):
+                return k
+        return None
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            k = self._key_at(event.position().x(), event.position().y())
+            if k and k.row >= 0:
+                self.key_clicked.emit(k.row, k.col)
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        k = self._key_at(event.position().x(), event.position().y())
+        new_hover = (k.row, k.col) if k and k.row >= 0 else None
+        if new_hover != self._hover_key:
+            self._hover_key = new_hover
+            self.update()
+
+    def leaveEvent(self, event) -> None:
+        self._hover_key = None
+        self.update()
+
     def paintEvent(self, event) -> None:
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
@@ -63,15 +97,13 @@ class KeyboardWidget(QWidget):
         p.setFont(font)
 
         for k in self._layout:
-            px = self.MARGIN + int(k.x * (self.UNIT + self.GAP))
-            py = self.MARGIN + int(k.y * (self.UNIT + self.GAP))
-            pw = int(k.w * self.UNIT + max(0, k.w - 1) * self.GAP)
-            ph = int(k.h * self.UNIT + max(0, k.h - 1) * self.GAP)
-            rect = QRectF(px, py, pw, ph)
+            rect = self._key_rect(k)
+            is_hover = self._hover_key == (k.row, k.col) and k.row >= 0
 
             # Key body
             p.setPen(Qt.NoPen)
-            p.setBrush(QColor(35, 35, 35))
+            bg = QColor(50, 50, 50) if is_hover else QColor(35, 35, 35)
+            p.setBrush(bg)
             p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
 
             # LED color
@@ -79,15 +111,17 @@ class KeyboardWidget(QWidget):
             if color and (color.red() or color.green() or color.blue()):
                 p.setBrush(color)
                 p.setOpacity(0.8)
-                inner = QRectF(px + 3, py + 3, pw - 6, ph - 6)
+                inner = QRectF(rect.x() + 3, rect.y() + 3, rect.width() - 6, rect.height() - 6)
                 p.drawRoundedRect(inner, self.CORNER_RADIUS - 1, self.CORNER_RADIUS - 1)
                 p.setOpacity(1.0)
 
             # Border
-            p.setPen(QPen(QColor(55, 55, 55), 1))
+            border_color = QColor(100, 100, 100) if is_hover else QColor(55, 55, 55)
+            p.setPen(QPen(border_color, 1.5 if is_hover else 1))
             p.setBrush(Qt.NoBrush)
             p.drawRoundedRect(rect, self.CORNER_RADIUS, self.CORNER_RADIUS)
 
             # Label
-            p.setPen(QColor(180, 180, 180))
+            label_color = QColor(220, 220, 220) if is_hover else QColor(180, 180, 180)
+            p.setPen(label_color)
             p.drawText(rect, Qt.AlignCenter, k.label)

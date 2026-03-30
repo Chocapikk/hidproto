@@ -31,6 +31,7 @@ class LogitechG815Protocol(HIDProtocol):
     report_id = 0x11  # long message by default
     report_size = 20
     rows = 6
+    keyboard_size = "full"
     cols = 22
 
     preset_base = 0x00

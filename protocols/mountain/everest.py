@@ -12,6 +12,7 @@ class MountainEverestProtocol(HIDProtocol):
     report_id = 0x00
     report_size = 65
     rows, cols = 6, 22
+    keyboard_size = "full"
     preset_base = 0x00
     custom_base = 0x00
     color_custom = 0x00

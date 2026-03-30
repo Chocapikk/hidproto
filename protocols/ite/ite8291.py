@@ -28,6 +28,7 @@ class ITE8291Protocol(HIDProtocol):
     report_id = 0x00
     report_size = 8
     rows = 6
+    keyboard_size = "full"
     cols = 21
 
     preset_base = 0x00

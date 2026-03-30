@@ -112,6 +112,12 @@ ANSI_FULL: list[Key] = [
     Key("Right", 15.25, 5.25, row=5, col=15),
 ]
 
+TKL: list[Key] = [k for k in ANSI_FULL if k.col <= 16]
+
+SIXTY: list[Key] = [k for k in ANSI_FULL if k.row >= 1 and k.col <= 13]
+
 LAYOUTS: dict[str, list[Key]] = {
-    "ansi_full": ANSI_FULL,
+    "full": ANSI_FULL,
+    "tkl": TKL,
+    "sixty": SIXTY,
 }

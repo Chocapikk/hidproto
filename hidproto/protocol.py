@@ -62,6 +62,7 @@ class HIDProtocol(metaclass=_ProtocolMeta):
     preset_base: int = 0x00
     custom_base: int = 0x00
     color_custom: int = 0x00
+    keyboard_size: str = "full"
     _commands: dict[str, CommandSpec]
 
     def __init__(self, transport: object | None = None) -> None:

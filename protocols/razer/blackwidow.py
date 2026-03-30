@@ -31,6 +31,7 @@ class RazerBlackWidowProtocol(HIDProtocol):
     report_id = 0x00
     report_size = 90
     rows = 6
+    keyboard_size = "full"
     cols = 22
 
     preset_base = 0x00

@@ -25,6 +25,7 @@ class ITE8910Protocol(HIDProtocol):
     report_id = 0xCC
     report_size = 6
     rows, cols = 6, 20
+    keyboard_size = "full"
 
     # Slot encoding
     preset_base = 0x71
