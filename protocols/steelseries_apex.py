@@ -19,15 +19,15 @@ class SteelSeriesApexProtocol(HIDProtocol):
     Packets: [0x00, packet_id, ...data..., zero-padded]
     """
 
-    vendor_id    = 0x1038
-    product_id   = 0x1610  # Apex Pro
-    report_id    = 0x00
-    report_size  = 65
-    rows         = 6
-    cols         = 22
+    vendor_id = 0x1038
+    product_id = 0x1610  # Apex Pro
+    report_id = 0x00
+    report_size = 65
+    rows = 6
+    cols = 22
 
-    preset_base  = 0x00
-    custom_base  = 0x00
+    preset_base = 0x00
+    custom_base = 0x00
     color_custom = 0x00
 
     def _report(self, *data: int) -> bytes:
@@ -40,28 +40,20 @@ class SteelSeriesApexProtocol(HIDProtocol):
 
     # Commands
     # Direct init: [0x00, 0x3A, ...] (or 0x40 for 2023 models)
-    direct_init    = command(0x00, 0x3A, doc="Direct mode init")
+    direct_init = command(0x00, 0x3A, doc="Direct mode init")
     # Select profile: [0x00, 0x89, profile_id]
     select_profile = command(0x00, 0x89, args=1, doc="Select profile")
     # Get serial: [0x00, 0xFF]
-    get_serial     = command(0x00, 0xFF, feature=False, doc="Get serial number")
+    get_serial = command(0x00, 0xFF, feature=False, doc="Get serial number")
     # Get firmware: [0x00, 0x90]
-    get_firmware   = command(0x00, 0x90, feature=False, doc="Get firmware version")
+    get_firmware = command(0x00, 0x90, feature=False, doc="Get firmware version")
 
     # Effects
     effects = {
-        "direct": effect("direct", steps=(
-            step("direct_init"),
-        )),
-        "profile_1": effect("profile_1", steps=(
-            step("select_profile", 0x01),
-        )),
-        "profile_2": effect("profile_2", steps=(
-            step("select_profile", 0x02),
-        )),
-        "profile_3": effect("profile_3", steps=(
-            step("select_profile", 0x03),
-        )),
+        "direct": effect("direct", steps=(step("direct_init"),)),
+        "profile_1": effect("profile_1", steps=(step("select_profile", 0x01),)),
+        "profile_2": effect("profile_2", steps=(step("select_profile", 0x02),)),
+        "profile_3": effect("profile_3", steps=(step("select_profile", 0x03),)),
     }
 
 

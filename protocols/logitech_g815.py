@@ -26,32 +26,32 @@ class LogitechG815Protocol(HIDProtocol):
     Long message:  [0x11, device_index, feature_index, command, data[16]] (20 bytes)
     """
 
-    vendor_id      = 0x046D
-    product_id     = 0xC339  # G815 RGB, override per device
-    report_id      = 0x11    # long message by default
-    report_size    = 20
-    rows           = 6
-    cols           = 22
+    vendor_id = 0x046D
+    product_id = 0xC339  # G815 RGB, override per device
+    report_id = 0x11  # long message by default
+    report_size = 20
+    rows = 6
+    cols = 22
 
-    preset_base    = 0x00
-    custom_base    = 0x00
-    color_custom   = 0x00
+    preset_base = 0x00
+    custom_base = 0x00
+    color_custom = 0x00
 
-    device_index   = 0xFF
+    device_index = 0xFF
 
     # RGB effects feature page index (device-specific, queried at runtime)
     # For static definitions we use a placeholder
     rgb_feature_idx = 0x0E
 
     # Mode IDs
-    mode_off       = 0x0000
-    mode_on        = 0x0001
-    mode_spectrum  = 0x0003
-    mode_wave      = 0x0004
-    mode_star      = 0x0005
+    mode_off = 0x0000
+    mode_on = 0x0001
+    mode_spectrum = 0x0003
+    mode_wave = 0x0004
+    mode_star = 0x0005
     mode_breathing = 0x000A
-    mode_ripple    = 0x000B
-    mode_custom    = 0x000C
+    mode_ripple = 0x000B
+    mode_custom = 0x000C
 
     def _report(self, *data: int) -> bytes:
         """Build a Logitech long FAP message (20 bytes)."""
@@ -76,11 +76,11 @@ class LogitechG815Protocol(HIDProtocol):
     # Commands
     # Root: query feature index
     # [feature_idx=0x00, cmd=0x01, feature_page_hi, feature_page_lo]
-    get_feature_index  = command(0x00, 0x01, args=2, doc="Query feature index")
+    get_feature_index = command(0x00, 0x01, args=2, doc="Query feature index")
     # Set mode: [rgb_feature_idx, 0x30, zone, mode_hi, mode_lo, ...]
-    set_mode           = command(args=16, doc="Set RGB mode")
+    set_mode = command(args=16, doc="Set RGB mode")
     # Direct mode control: [rgb_feature_idx, 0x50, enable]
-    set_direct         = command(args=3, doc="Enable/disable direct mode")
+    set_direct = command(args=3, doc="Enable/disable direct mode")
 
     # Effects
     # set_mode args: [feat_idx, cmd, zone, 0, mode_hi, mode_lo, speed, R, G, B, brightness, ...]
