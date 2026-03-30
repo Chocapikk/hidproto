@@ -23,6 +23,7 @@ from hidproto.device import HIDDevice
 from hidproto.discovery import list_devices
 from hidproto.registry import discover
 
+from .effect_panel import EffectPanel
 from .keyboard_widget import KeyboardWidget
 
 
@@ -42,52 +43,51 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
 
-        # Keyboard widget (replaced on connect with device-specific layout)
+        # Keyboard widget
         self._root = root
         self._kb_widget = KeyboardWidget([])
         root.insertWidget(0, self._kb_widget)
 
-        # Controls row 1
+        # Row 1: device info + per-key color
         row1 = QHBoxLayout()
         root.addLayout(row1)
 
-        # Device info
         self._device_label = QLabel("Detecting...")
         self._device_label.setStyleSheet("color: #aaa; font-size: 11px;")
         row1.addWidget(self._device_label)
-
         row1.addStretch()
 
-        # Color picker button
+        row1.addWidget(QLabel("Key color:", styleSheet="color: #aaa;"))
         self._color_btn = QPushButton()
         self._color_btn.setFixedSize(30, 30)
         self._update_color_btn()
         self._color_btn.clicked.connect(self._on_color_pick)
-        row1.addWidget(QLabel("Color:", styleSheet="color: #aaa;"))
         row1.addWidget(self._color_btn)
 
-        # Fill all button
         fill_btn = QPushButton("Fill All")
         fill_btn.setStyleSheet("color: white; background: #444; padding: 4px 10px;")
         fill_btn.clicked.connect(self._on_fill_all)
         row1.addWidget(fill_btn)
 
-        # Clear button
         clear_btn = QPushButton("Clear")
         clear_btn.setStyleSheet("color: white; background: #444; padding: 4px 10px;")
         clear_btn.clicked.connect(self._on_clear)
         row1.addWidget(clear_btn)
 
-        # Controls row 2
+        # Row 2: effect + dynamic controls
         row2 = QHBoxLayout()
         root.addLayout(row2)
 
-        # Effect selector
         row2.addWidget(QLabel("Effect:", styleSheet="color: #aaa;"))
         self._effect_combo = QComboBox()
         self._effect_combo.setStyleSheet("color: white; background: #333; padding: 4px;")
-        self._effect_combo.currentTextChanged.connect(self._on_effect_changed)
+        self._effect_combo.currentTextChanged.connect(self._on_effect_selected)
         row2.addWidget(self._effect_combo)
+
+        # Dynamic effect options (direction, colors)
+        self._effect_panel = EffectPanel()
+        self._effect_panel.apply_requested.connect(self._on_apply_effect)
+        row2.addWidget(self._effect_panel)
 
         row2.addStretch()
 
@@ -115,11 +115,8 @@ class MainWindow(QMainWindow):
         self._speed_label.setStyleSheet("color: #ccc; min-width: 20px;")
         row2.addWidget(self._speed_label)
 
-        # Status bar
         self.statusBar().setStyleSheet("color: #888;")
-
         self.resize(self._kb_widget.sizeHint().width() + 30, self._kb_widget.sizeHint().height() + 150)
-
         self._auto_connect()
 
     def _auto_connect(self) -> None:
@@ -134,7 +131,6 @@ class MainWindow(QMainWindow):
                         self._device_label.setStyleSheet("color: #2a6; font-size: 11px;")
                         self.statusBar().showMessage(f"Connected: {name}")
 
-                        # Swap keyboard layout from protocol
                         proto_keys = getattr(proto_cls, "keys", ())
                         old = self._kb_widget
                         self._kb_widget = KeyboardWidget(list(proto_keys))
@@ -162,7 +158,7 @@ class MainWindow(QMainWindow):
         )
 
     def _on_color_pick(self) -> None:
-        color = QColorDialog.getColor(self._current_color, self, "Pick LED Color")
+        color = QColorDialog.getColor(self._current_color, self, "Pick Key Color")
         if color.isValid():
             self._current_color = color
             self._update_color_btn()
@@ -174,11 +170,6 @@ class MainWindow(QMainWindow):
             self._device.effect("direct")
             self._device.brightness(self._brightness.value())
             self._in_direct_mode = True
-            self._effect_combo.blockSignals(True)
-            idx = self._effect_combo.findText("direct")
-            if idx >= 0:
-                self._effect_combo.setCurrentIndex(idx)
-            self._effect_combo.blockSignals(False)
         except Exception:
             pass
 
@@ -206,26 +197,18 @@ class MainWindow(QMainWindow):
                 )
             except Exception:
                 pass
-        self.statusBar().showMessage(
-            f"Key ({row},{col}) = #{self._current_color.red():02x}"
-            f"{self._current_color.green():02x}{self._current_color.blue():02x}"
-        )
+        self.statusBar().showMessage(f"Key ({row},{col}) set")
 
     def _on_fill_all(self) -> None:
         self._kb_widget.set_all_colors(self._current_color)
         if self._device:
             try:
-                # Send direct mode + all keys
                 self._device.effect("direct")
+                self._in_direct_mode = True
                 for k in self._kb_widget._layout:
                     if k.row >= 0:
-                        self._device.set_key(
-                            k.row,
-                            k.col,
-                            self._current_color.red(),
-                            self._current_color.green(),
-                            self._current_color.blue(),
-                        )
+                        c = self._current_color
+                        self._device.set_key(k.row, k.col, c.red(), c.green(), c.blue())
             except Exception:
                 pass
         self.statusBar().showMessage("Filled all keys")
@@ -235,19 +218,37 @@ class MainWindow(QMainWindow):
         if self._device:
             try:
                 self._device.effect("off")
+                self._in_direct_mode = False
             except Exception:
                 pass
         self.statusBar().showMessage("Cleared")
 
-    def _on_effect_changed(self, effect: str) -> None:
+    def _on_effect_selected(self, effect: str) -> None:
+        """Update dynamic controls when effect changes."""
+        if not effect or not self._proto_cls:
+            return
+
+        effects = getattr(self._proto_cls, "effects", {})
+        spec = effects.get(effect)
+        if spec:
+            self._effect_panel.configure(spec, self._proto_cls)
+
+        self._on_apply_effect()
+
+    def _on_apply_effect(self) -> None:
+        """Apply current effect with panel options."""
+        effect = self._effect_combo.currentText()
         if not self._device or not effect:
             return
+
         self._in_direct_mode = effect == "direct"
+
         try:
             self._device.brightness(self._brightness.value())
             self._device.speed(self._speed.value())
-            self._device.effect(effect)
-            self.statusBar().showMessage(f"Effect: {effect}")
+            kwargs = self._effect_panel.get_effect_kwargs()
+            self._device.effect(effect, **kwargs)
+            self.statusBar().showMessage(f"Effect: {effect} {kwargs}")
         except Exception as e:
             self.statusBar().showMessage(f"Error: {e}")
 
