@@ -35,32 +35,34 @@ def _device() -> tuple[HIDDevice, FakeTransport]:
     return HIDDevice(proto), transport
 
 
-def test_brightness_sends_report() -> None:
+def test_brightness_ramps_from_zero() -> None:
+    dev, transport = _device()
+    dev.brightness(3)
+    # Sends 0, 1, 2, 3 = 4 reports
+    assert len(transport.sent) == 4
+    assert transport.sent[-1][2] == 3
+
+
+def test_brightness_reaches_target() -> None:
     dev, transport = _device()
     dev.brightness(8)
-    assert len(transport.sent) == 1
-    assert transport.sent[0][2] == 8
+    assert transport.sent[-1][2] == 8
 
 
-def test_brightness_cached() -> None:
-    dev, transport = _device()
-    dev.brightness(8)
-    dev.brightness(8)
-    assert len(transport.sent) == 1
-
-
-def test_speed_sends_report() -> None:
+def test_speed_ramps_from_zero() -> None:
     dev, transport = _device()
     dev.speed(5)
-    assert len(transport.sent) == 1
+    # Sends 0, 1, 2, 3, 4, 5 = 6 reports
+    assert len(transport.sent) == 6
 
 
 def test_invalidate_clears_cache() -> None:
     dev, transport = _device()
-    dev.brightness(8)
+    dev.brightness(3)
+    count_first = len(transport.sent)
     dev.invalidate()
-    dev.brightness(8)
-    assert len(transport.sent) == 2
+    dev.brightness(3)
+    assert len(transport.sent) == count_first * 2
 
 
 def test_effect_simple() -> None:
@@ -135,4 +137,5 @@ def test_context_manager() -> None:
     proto = EffectProto(transport=transport)
     with HIDDevice(proto) as dev:
         dev.brightness(5)
-    assert len(transport.sent) == 1
+    # Ramps 0..5 = 6 reports
+    assert len(transport.sent) == 6

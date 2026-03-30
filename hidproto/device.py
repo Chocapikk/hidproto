@@ -27,8 +27,9 @@ class HIDDevice:
     def __init__(self, protocol: HIDProtocol) -> None:
         self.protocol = protocol
         self._cache: dict[str, bytes] = {}
-        self._brightness = 0
-        self._speed = 0
+        self._brightness = 8
+        self._speed = 5
+        self._bs_dirty = False
 
     @classmethod
     def for_protocol(cls, protocol_cls: type[HIDProtocol]) -> type[HIDDevice]:
@@ -56,13 +57,21 @@ class HIDDevice:
 
     def brightness(self, value: int) -> None:
         """Set brightness (0 to protocol max, typically 10)."""
-        self._brightness = max(0, min(10, value))
-        self.send_if_changed("bs", self._bs_report())
+        target = max(0, min(10, value))
+        self._bs_dirty = True
+        for i in range(target + 1):
+            self._brightness = i
+            self.protocol._send(self._bs_report())
+        self._cache["bs"] = self._bs_report()
 
     def speed(self, value: int) -> None:
         """Set animation speed (0 to protocol max, typically 10)."""
-        self._speed = max(0, min(10, value))
-        self.send_if_changed("bs", self._bs_report())
+        target = max(0, min(10, value))
+        self._bs_dirty = True
+        for i in range(target + 1):
+            self._speed = i
+            self.protocol._send(self._bs_report())
+        self._cache["bs"] = self._bs_report()
 
     # --- Per-key ---
 
